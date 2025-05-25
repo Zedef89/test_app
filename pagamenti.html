@@ -1,0 +1,119 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Lexend%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-slate-50 justify-between group/design-root overflow-x-hidden"
+      style='font-family: Lexend, "Noto Sans", sans-serif;'
+    >
+      <div>
+        <div class="flex items-center bg-slate-50 p-4 pb-2 justify-between">
+          <div class="text-[#0e151b] flex size-12 shrink-0 items-center" data-icon="ArrowLeft" data-size="24px" data-weight="regular">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+              <path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"></path>
+            </svg>
+          </div>
+          <h2 class="text-[#0e151b] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Payments</h2>
+        </div>
+        <h2 class="text-[#0e151b] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Payment Methods</h2>
+        <div class="flex items-center gap-4 bg-slate-50 px-4 min-h-[72px] py-2">
+          <div class="bg-center bg-no-repeat aspect-video bg-contain h-6 w-10 shrink-0" style='background-image: url("/paypal.svg");'></div>
+          <div class="flex flex-col justify-center">
+            <p class="text-[#0e151b] text-base font-medium leading-normal line-clamp-1">PayPal</p>
+            <p class="text-[#4e7497] text-sm font-normal leading-normal line-clamp-2">Secure and fast payments</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 bg-slate-50 px-4 min-h-[72px] py-2">
+          <div class="text-[#0e151b] flex items-center justify-center rounded-lg bg-[#e7edf3] shrink-0 size-12" data-icon="Bank" data-size="24px" data-weight="regular">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+              <path
+                d="M24,104H48v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16H208V104h24a8,8,0,0,0,4.19-14.81l-104-64a8,8,0,0,0-8.38,0l-104,64A8,8,0,0,0,24,104Zm40,0H96v64H64Zm80,0v64H112V104Zm48,64H160V104h32ZM128,41.39,203.74,88H52.26ZM248,208a8,8,0,0,1-8,8H16a8,8,0,0,1,0-16H240A8,8,0,0,1,248,208Z"
+              ></path>
+            </svg>
+          </div>
+          <div class="flex flex-col justify-center">
+            <p class="text-[#0e151b] text-base font-medium leading-normal line-clamp-1">Bank Transfer</p>
+            <p class="text-[#4e7497] text-sm font-normal leading-normal line-clamp-2">Bank transfer</p>
+          </div>
+        </div>
+        <h2 class="text-[#0e151b] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Transaction History</h2>
+        <div class="flex items-center gap-4 bg-slate-50 px-4 min-h-[72px] py-2 justify-between">
+          <div class="flex flex-col justify-center">
+            <p class="text-[#0e151b] text-base font-medium leading-normal line-clamp-1">Payment to Sarah</p>
+            <p class="text-[#4e7497] text-sm font-normal leading-normal line-clamp-2">Completed</p>
+          </div>
+          <div class="shrink-0"><p class="text-[#0e151b] text-base font-normal leading-normal">$150</p></div>
+        </div>
+        <div class="flex items-center gap-4 bg-slate-50 px-4 min-h-[72px] py-2 justify-between">
+          <div class="flex flex-col justify-center">
+            <p class="text-[#0e151b] text-base font-medium leading-normal line-clamp-1">Payment to Emily</p>
+            <p class="text-[#4e7497] text-sm font-normal leading-normal line-clamp-2">Completed</p>
+          </div>
+          <div class="shrink-0"><p class="text-[#0e151b] text-base font-normal leading-normal">$200</p></div>
+        </div>
+        <div class="flex items-center gap-4 bg-slate-50 px-4 min-h-[72px] py-2 justify-between">
+          <div class="flex flex-col justify-center">
+            <p class="text-[#0e151b] text-base font-medium leading-normal line-clamp-1">Payment to Jessica</p>
+            <p class="text-[#4e7497] text-sm font-normal leading-normal line-clamp-2">Completed</p>
+          </div>
+          <div class="shrink-0"><p class="text-[#0e151b] text-base font-normal leading-normal">$180</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex gap-2 border-t border-[#e7edf3] bg-slate-50 px-4 pb-3 pt-2">
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#4e7497]" href="#">
+            <div class="text-[#4e7497] flex h-8 items-center justify-center" data-icon="House" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M218.83,103.77l-80-75.48a1.14,1.14,0,0,1-.11-.11,16,16,0,0,0-21.53,0l-.11.11L37.17,103.77A16,16,0,0,0,32,115.55V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V160h32v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V115.55A16,16,0,0,0,218.83,103.77ZM208,208H160V160a16,16,0,0,0-16-16H112a16,16,0,0,0-16,16v48H48V115.55l.11-.1L128,40l79.9,75.43.11.1Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#4e7497] text-xs font-medium leading-normal tracking-[0.015em]">Home</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#4e7497]" href="#">
+            <div class="text-[#4e7497] flex h-8 items-center justify-center" data-icon="MagnifyingGlass" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+              </svg>
+            </div>
+            <p class="text-[#4e7497] text-xs font-medium leading-normal tracking-[0.015em]">Search</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#4e7497]" href="#">
+            <div class="text-[#4e7497] flex h-8 items-center justify-center" data-icon="ChatCircleDots" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM84,116a12,12,0,1,0,12,12A12,12,0,0,0,84,116Zm88,0a12,12,0,1,0,12,12A12,12,0,0,0,172,116Zm60,12A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-16,0A88,88,0,1,0,51.81,172.06a8,8,0,0,1,.66,6.54L40,216,77.4,203.53a7.85,7.85,0,0,1,2.53-.42,8,8,0,0,1,4,1.08A88,88,0,0,0,216,128Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#4e7497] text-xs font-medium leading-normal tracking-[0.015em]">Messages</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-[#0e151b]" href="#">
+            <div class="text-[#0e151b] flex h-8 items-center justify-center" data-icon="User" data-size="24px" data-weight="fill">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#0e151b] text-xs font-medium leading-normal tracking-[0.015em]">Profile</p>
+          </a>
+        </div>
+        <div class="h-5 bg-slate-50"></div>
+      </div>
+    </div>
+  </body>
+</html>
