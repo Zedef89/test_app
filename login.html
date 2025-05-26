@@ -24,10 +24,15 @@
         </div>
         <h2 class="text-[#0e151b] tracking-light text-[28px] font-bold leading-tight px-4 text-center pb-3 pt-5">Benvenuto</h2>
         <p class="text-[#0e151b] text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">Trova la cura perfetta per i tuoi cari</p>
+        
+        <div id="messageArea" class="text-center p-2 text-sm"></div>
+
         <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
           <label class="flex flex-col min-w-40 flex-1">
             <input
+              id="emailInput"
               placeholder="Email"
+              type="email"
               class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e151b] focus:outline-0 focus:ring-0 border-none bg-[#e7edf3] focus:border-none h-14 placeholder:text-[#4e7497] p-4 text-base font-normal leading-normal"
               value=""
             />
@@ -36,7 +41,9 @@
         <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
           <label class="flex flex-col min-w-40 flex-1">
             <input
+              id="passwordInput"
               placeholder="Password"
+              type="password"
               class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0e151b] focus:outline-0 focus:ring-0 border-none bg-[#e7edf3] focus:border-none h-14 placeholder:text-[#4e7497] p-4 text-base font-normal leading-normal"
               value=""
             />
@@ -44,6 +51,7 @@
         </div>
         <div class="flex px-4 py-3">
           <button
+            id="loginButton"
             class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-5 flex-1 bg-[#1982e5] text-slate-50 text-base font-bold leading-normal tracking-[0.015em]"
           >
             <span class="truncate">Accedi</span>
@@ -72,5 +80,6 @@
         <div class="h-5 bg-slate-50"></div>
       </div>
     </div>
+    <script src="js/login.js" defer></script>
   </body>
 </html>

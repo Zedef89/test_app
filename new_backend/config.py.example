@@ -1,0 +1,35 @@
+# new_backend/config.py.example
+# This is an example configuration file.
+# Copy this file to config.py and fill in your actual configuration details.
+
+# Database Configuration
+DB_HOST = "localhost"  # e.g., "localhost" or IP address of your DB server
+DB_USER = "your_db_user" # Your MySQL username
+DB_PASSWORD = "your_db_password" # Your MySQL password
+DB_NAME = "your_db_name" # The name of the database to use
+
+# For JWT (if you choose to implement JWT-based tokens in auth_utils.py)
+# SECRET_KEY = "your-super-secret-jwt-key"  # A strong, random key for signing JWTs
+# ALGORITHM = "HS256"  # The algorithm used for JWT signing
+# ACCESS_TOKEN_EXPIRE_MINUTES = 30  # How long access tokens are valid
+
+# PayPal Configuration (Mocked for now, as per paypal_utils.py)
+# For real PayPal integration, you would get these from your PayPal Developer account.
+PAYPAL_CLIENT_ID = "your_paypal_client_id_placeholder" # Your PayPal App Client ID
+PAYPAL_CLIENT_SECRET = "your_paypal_client_secret_placeholder" # Your PayPal App Client Secret
+PAYPAL_MODE = "sandbox"  # "sandbox" for testing, "live" for production
+
+# Application Base URL (for constructing redirect URLs for PayPal, etc.)
+# This should be the URL where your frontend is accessible if separate,
+# or where the backend is served if they are on the same domain.
+APP_BASE_URL = "http://localhost:3000" # Example: Frontend running on port 3000, or http://localhost:8000 if frontend served by FastAPI/same domain
+
+# Paths for PayPal Redirects (these are paths on your frontend application)
+# The full URL will be constructed as: APP_BASE_URL + PAYPAL_RETURN_URL_PATH + "?internal_transaction_id=..."
+PAYPAL_RETURN_URL_PATH = "/payment-success"  # e.g., results in http://localhost:3000/payment-success
+PAYPAL_CANCEL_URL_PATH = "/payment-cancelled" # e.g., results in http://localhost:3000/payment-cancelled
+
+# Other application settings can be added here
+# For example:
+# API_KEY = "your_external_service_api_key"
+# DEFAULT_ITEMS_PER_PAGE = 20
