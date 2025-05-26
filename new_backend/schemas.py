@@ -248,3 +248,258 @@ class FamilyFilterParams(BaseModel):
     location_preferences: Optional[str] = None # New filter
     number_of_children: Optional[int] = None # New filter
     # Consider adding specific_needs if it's a filterable public attribute
+
+# --- Transaction Schemas ---
+# from decimal import Decimal # Already imported
+# PyEnum is already imported
+
+class TransactionStatusEnum(str, PyEnum): # Using schema.sql values
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
+    # cancelled = "cancelled" # Not in my current schema ENUM
+    refunded = "refunded"
+
+class TransactionBase(BaseModel):
+    amount: Decimal
+    currency: str = "USD" # Default currency, matches my schema.sql
+    user_receiving_payment_id: int # This is users.id of the recipient
+    match_request_id: Optional[int] = None
+
+class TransactionCreate(TransactionBase): # Used when initiating a payment
+    # user_initiating_payment_id will be derived from the authenticated user
+    pass
+
+class TransactionUserResponse(BaseModel): # Simplified user for transaction response
+    user_id: int # users.id
+    username: str
+    email: Optional[EmailStr] = None
+    class Config: from_attributes = True
+
+class TransactionResponse(BaseModel):
+    id: int # Our internal transaction ID (transactions.id)
+    user_initiating_payment: Optional[TransactionUserResponse] = None
+    user_receiving_payment: Optional[TransactionUserResponse] = None
+    match_request_id: Optional[int] = None
+    amount: Decimal
+    currency: str
+    payment_method: Optional[str] = None
+    paypal_payment_id: Optional[str] = None # PAYID-XXX from PayPal (transactions.paypal_payment_id)
+    # paypal_transaction_id maps to transaction_reference_id in DB (SALE-XXX from PayPal)
+    paypal_transaction_id: Optional[str] = None # This field will hold transactions.transaction_reference_id
+    transaction_status: TransactionStatusEnum 
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+
+    class Config:
+        from_attributes = True
+            
+    @classmethod
+    def from_query_result(cls, data: dict):
+        init_user_data = None
+        # Query aliases: init_user_id, init_username, init_email
+        if data.get('init_user_id'): 
+            init_user_data = TransactionUserResponse(
+                user_id=data['init_user_id'], 
+                username=data['init_username'], 
+                email=data.get('init_email')
+            )
+        
+        recv_user_data = None
+        # Query aliases: recv_user_id, recv_username, recv_email
+        if data.get('recv_user_id'):
+            recv_user_data = TransactionUserResponse(
+                user_id=data['recv_user_id'], 
+                username=data['recv_username'], 
+                email=data.get('recv_email')
+            )
+
+        return cls(
+            id=data['id'], # This is transactions.id (internal_transaction_id from query)
+            user_initiating_payment=init_user_data,
+            user_receiving_payment=recv_user_data,
+            match_request_id=data.get('match_request_id'),
+            amount=data['amount'],
+            currency=data['currency'],
+            payment_method=data.get('payment_method'),
+            paypal_payment_id=data.get('paypal_payment_id'), # PAYID-XXX
+            paypal_transaction_id=data.get('transaction_reference_id'), # SALE-XXX (maps to this field)
+            transaction_status=data['transaction_status'], 
+            created_at=data['created_at'],
+            updated_at=data.get('updated_at')
+        )
+
+class CreatePaymentRequest(BaseModel): # For POST /payments/create
+    amount: Decimal 
+    currency: str = "USD"
+    match_request_id: int # ID of the match request this payment is for
+    # user_receiving_payment_id will be derived from the match_request_id on the backend
+
+class CreatePaymentResponse(BaseModel):
+    approval_url: Optional[str] = None 
+    internal_transaction_id: int     
+    message: Optional[str] = None 
+
+class ExecutePaymentRequest(BaseModel):
+    paypal_payment_id: str # PAYID-XXX
+    paypal_payer_id: str   # PayerID-XXX
+    internal_transaction_id: int 
+
+class CancelPaymentRequest(BaseModel): 
+    internal_transaction_id: int
+
+
+# --- Review Schemas ---
+# Ensure HttpUrl, Field, datetime, List, Optional are imported if not already at the top.
+# PyEnum is already imported for DayOfWeekEnum and MatchStatusEnum.
+
+class ReviewBase(BaseModel):
+    rating: int = Field(..., ge=1, le=5) # Rating between 1 and 5
+    comment: Optional[str] = None
+
+class ReviewCreate(ReviewBase):
+    # As per task, this is for a family reviewing a caregiver.
+    # The caregiver_user_id is the users.id of the caregiver being reviewed.
+    # The match_request_id will be used to link the review to a specific engagement.
+    caregiver_user_id: int 
+    match_request_id: int # Added to link review to a specific match/job
+
+class ReviewUpdate(BaseModel): # All fields optional for update
+    rating: Optional[int] = Field(None, ge=1, le=5)
+    comment: Optional[str] = None
+
+class ReviewerResponse(BaseModel): # Represents the family member who wrote the review
+    family_user_id: int # users.id of the family member
+    family_profile_id: int # family_profiles.id
+    username: str
+    profile_picture_url: Optional[HttpUrl] = None
+
+    class Config:
+        from_attributes = True
+
+class ReviewResponse(ReviewBase):
+    id: int
+    # caregiver_profile_id: int # The profile ID of the caregiver who was reviewed (from cp.id)
+    # The reviewee_id (user_id of caregiver) is directly in reviews table.
+    # My get_review_details_by_id selects cp.id AS caregiver_profile_id
+    caregiver_user_id: int # Added: users.id of the caregiver reviewed (from r.reviewee_id AS caregiver_user_id)
+    caregiver_profile_id: Optional[int] = None # From cp.id AS caregiver_profile_id
+    
+    family: ReviewerResponse # Details of the family member who wrote review
+    
+    review_type: str # 'family_to_caregiver' or 'caregiver_to_family' etc.
+    match_request_id: Optional[int] = None
+    
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+
+    class Config:
+        from_attributes = True
+            
+    @classmethod
+    def from_query_result(cls, data: dict):
+        # This helper maps flat query result to nested structure.
+        # It expects keys from the get_review_details_by_id query.
+        return cls(
+            id=data['id'],
+            rating=data['rating'],
+            comment=data.get('comment'),
+            created_at=data['created_at'],
+            updated_at=data.get('updated_at'),
+            caregiver_user_id=data['caregiver_user_id'], # From r.reviewee_id AS caregiver_user_id
+            caregiver_profile_id=data.get('caregiver_profile_id'), # From cp.id AS caregiver_profile_id
+            family=ReviewerResponse(
+                family_user_id=data['family_user_id'], # From r.reviewer_id AS family_user_id
+                family_profile_id=data['family_profile_id'], # From fp.id AS family_profile_id
+                username=data['family_username'], # From fam_user.username
+                profile_picture_url=data.get('family_profile_picture_url') # From fam_user.profile_picture
+            ),
+            review_type=data['review_type'],
+            match_request_id=data.get('match_request_id')
+        )
+
+# PaginatedResponse[ReviewResponse] will be used for listing reviews.
+# Ensure PaginatedResponse and T = TypeVar('T') are defined (they are from previous steps).
+
+# --- Match Request Schemas ---
+# Ensure HttpUrl is available if not already imported at the top
+# from pydantic import HttpUrl # Already imported for PhotoBase
+
+class MatchStatusEnum(str, PyEnum): # Using schema.sql values
+    pending = 'pending'
+    accepted = 'accepted'
+    declined = 'declined' 
+    expired = 'expired'
+    completed = 'completed'
+    # declined_by_family = 'declined_by_family' # Not in my current schema enum
+    # declined_by_caregiver = 'declined_by_caregiver' # Not in my current schema enum
+
+
+class MatchRequestCreate(BaseModel):
+    caregiver_user_id: int # The users.id of the caregiver
+    message_to_caregiver: Optional[str] = None
+    proposed_start_date: Optional[datetime.datetime] = None
+    requested_hours_per_week: Optional[int] = None
+
+
+class UserInMatchResponse(BaseModel):
+    user_id: int # This is users.id
+    profile_id: Optional[int] = None # This is caregiver_profiles.id or family_profiles.id
+    username: str
+    email: EmailStr
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    profile_picture_url: Optional[HttpUrl] = None # Using HttpUrl as per task example
+
+    class Config:
+        from_attributes = True
+
+
+class MatchRequestResponse(BaseModel):
+    id: int
+    family: UserInMatchResponse
+    caregiver: UserInMatchResponse
+    status: MatchStatusEnum # Use the adapted enum
+    message_to_caregiver: Optional[str] = None # Added from my schema
+    proposed_start_date: Optional[datetime.datetime] = None # Added from my schema
+    requested_hours_per_week: Optional[int] = None # Added from my schema
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+
+    class Config:
+        from_attributes = True
+            
+    @classmethod
+    def from_query_result(cls, data: dict):
+        # Helper to map flat query result to nested structure
+        # Ensure data keys match the aliases from matching_queries.py
+        return cls(
+            id=data['id'],
+            status=data['status'], # This should be 'request_status' aliased as 'status' from query
+            message_to_caregiver=data.get('message_to_caregiver'),
+            proposed_start_date=data.get('proposed_start_date'),
+            requested_hours_per_week=data.get('requested_hours_per_week'),
+            created_at=data['created_at'],
+            updated_at=data.get('updated_at'),
+            family=UserInMatchResponse(
+                user_id=data['family_id'], 
+                profile_id=data.get('family_profile_id'),
+                username=data['family_username'], 
+                email=data['family_email'],
+                first_name=data.get('family_first_name'),
+                last_name=data.get('family_last_name'),
+                profile_picture_url=data.get('family_profile_picture_url')
+            ),
+            caregiver=UserInMatchResponse(
+                user_id=data['caregiver_id'], 
+                profile_id=data.get('caregiver_profile_id'),
+                username=data['caregiver_username'], 
+                email=data['caregiver_email'],
+                first_name=data.get('caregiver_first_name'),
+                last_name=data.get('caregiver_last_name'),
+                profile_picture_url=data.get('caregiver_profile_picture_url')
+            )
+        )
+
+class MatchUpdateRequest(BaseModel):
+    status: MatchStatusEnum # Uses the adapted enum

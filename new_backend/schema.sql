@@ -161,7 +161,8 @@ CREATE TABLE transactions (
     currency VARCHAR(10) DEFAULT 'USD',
     transaction_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
     payment_method VARCHAR(50), -- e.g., 'paypal', 'stripe_card_id_xxx'
-    transaction_reference_id VARCHAR(255) UNIQUE, -- ID from payment gateway
+    paypal_payment_id VARCHAR(255) UNIQUE NULL, -- To store PAYID-XXXX from PayPal payment creation
+    transaction_reference_id VARCHAR(255) UNIQUE, -- ID from payment gateway (e.g., PayPal SALE-ID)
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

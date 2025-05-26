@@ -15,15 +15,24 @@ from . import auth_utils
 from . import profile_queries
 from . import schemas
 from . import caregiver_queries
-from . import listing_queries # New import
-# from . import config # For potential future use of SECRET_KEY etc.
+from . import listing_queries
+from . import matching_queries
+from . import messaging_queries
+from . import review_queries
+from . import transaction_queries # New import
+from . import paypal_utils # New import
+from . import config # New import, for PayPal URLs
 
 from fastapi import Request, Query # New imports
 import math # New import
 
 app = FastAPI()
 caregiver_router = APIRouter(prefix="/api/caregivers", tags=["Caregiver Specific"])
-list_router = APIRouter(tags=["Listings & Search"]) # New router for listings
+list_router = APIRouter(tags=["Listings & Search"]) 
+match_router = APIRouter(prefix="/api/matches", tags=["Matching System"]) 
+messaging_router = APIRouter(prefix="/api", tags=["Messaging System"]) 
+review_router = APIRouter(prefix="/api/reviews", tags=["Review System"]) 
+payment_router = APIRouter(prefix="/api/payments", tags=["Payment System"]) # New Payment Router
 
 
 # Dependency to get current caregiver's profile_id (from caregiver_profiles table)
@@ -32,6 +41,7 @@ async def get_current_caregiver_profile_id(current_user: dict = Depends(get_curr
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not a caregiver")
     
     db_conn = None
+    cursor = None # Initialize cursor to None for the finally block
     try:
         db_conn = db_utils.get_db_connection()
         if not db_conn:
@@ -41,20 +51,71 @@ async def get_current_caregiver_profile_id(current_user: dict = Depends(get_curr
         cursor.execute("SELECT id FROM caregiver_profiles WHERE user_id = %s", (current_user['id'],))
         cg_profile = cursor.fetchone()
         if not cg_profile:
-            # This case could mean data inconsistency or profile not fully set up
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Caregiver profile not found for this user.")
-        return cg_profile['id'] # This is caregiver_profiles.id
+        return cg_profile['id']
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error in get_current_caregiver_profile_id: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error fetching caregiver profile ID.")
     finally:
-        if cursor: # cursor might not be defined if get_db_connection fails early
+        if cursor:
             cursor.close()
         if db_conn and db_conn.is_connected():
             db_conn.close()
 
+# Dependency to get current family's profile_id (from family_profiles table)
+async def get_current_family_profile_id(current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'family':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not a family member")
+    
+    db_conn = None
+    cursor = None # Initialize cursor to None
+    try:
+        db_conn = db_utils.get_db_connection() # Manual DB connection
+        if not db_conn:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database connection error")
+            
+        cursor = db_conn.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM family_profiles WHERE user_id = %s", (current_user['id'],))
+        fam_profile = cursor.fetchone()
+        if not fam_profile:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Family profile not found for this user.")
+        return fam_profile['id']
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in get_current_family_profile_id: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error fetching family profile ID.")
+    finally:
+        if cursor: # Ensure cursor is closed if it was opened
+            cursor.close()
+        if db_conn and db_conn.is_connected(): # Close manual connection
+            db_conn.close()
+
+# Dependency to check if current user is a participant in a conversation
+async def get_conversation_if_participant(
+    conversation_id: int, 
+    current_user: dict = Depends(get_current_user)
+) -> int: # Return conversation_id for convenience if participant
+    db_conn = None
+    try:
+        db_conn = db_utils.get_db_connection()
+        if not db_conn:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database connection error")
+        
+        is_participant = messaging_queries.check_user_in_conversation(db_conn, current_user['id'], conversation_id)
+        if not is_participant:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not a participant in this conversation.")
+        return conversation_id # Or True, but returning ID might be useful
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in get_conversation_if_participant: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error verifying conversation participation.")
+    finally:
+        if db_conn and db_conn.is_connected():
+            db_conn.close()
 
 # Initialize DB Pool on startup
 @app.on_event("startup")
@@ -784,3 +845,7 @@ async def list_all_families(
             db_conn.close()
 
 app.include_router(list_router)
+app.include_router(match_router) 
+app.include_router(messaging_router) 
+app.include_router(review_router) 
+app.include_router(payment_router) # Register the new payment_router
